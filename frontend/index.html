@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Przyjazna Postać - Interaktywna Aplikacja dla Dzieci</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="container">
+        <!-- Background decorations -->
+        <div class="tree tree1"></div>
+        <div class="tree tree2"></div>
+        <div class="tree tree3"></div>
+        <div class="tree tree4"></div>
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="sun"></div>
+        <div class="butterfly butterfly1"></div>
+        <div class="butterfly butterfly2"></div>
+
+        <!-- Main content -->
+        <div class="content">
+            <h1 class="title" id="title">Cześć! Jestem Twój Przyjaciel!</h1>
+
+            <!-- Character -->
+            <div class="character">
+                <div class="face" id="face">
+                    <div class="eyes">
+                        <div class="eye"><div class="pupil"></div></div>
+                        <div class="eye"><div class="pupil"></div></div>
+                    </div>
+                    <div class="nose"></div>
+                    <div class="mouth">
+                        <div class="mouth-closed"></div>
+                        <div class="mouth-open"></div>
+                    </div>
+                    <div class="cheek cheek-left"></div>
+                    <div class="cheek cheek-right"></div>
+                </div>
+            </div>
+
+            <!-- Control buttons -->
+            <div class="controls">
+                <button class="btn btn-mic" id="btnMic" title="Naciśnij aby mówić">🎤</button>
+                <button class="btn btn-lang" id="btnLang" title="Zmień język"><span id="langText">PL</span></button>
+                <button class="btn btn-msg" id="btnMsg" title="Napisz wiadomość">💬</button>
+            </div>
+
+            <!-- Instructions -->
+            <p class="instructions" id="instructions">Zadaj mi pytanie używając mikrofonu lub wpisz wiadomość!</p>
+
+            <!-- Response box -->
+            <div class="response-box" id="responseBox">
+                <p class="response-text" id="responseText"></p>
+            </div>
+        </div>
+
+        <!-- Dialog -->
+        <div class="dialog-overlay" id="dialogOverlay">
+            <div class="dialog">
+                <h2 class="dialog-title" id="dialogTitle">Wpisz swoją wiadomość</h2>
+                <input type="text" class="dialog-input" id="dialogInput" placeholder="Co chcesz wiedzieć?" />
+                <div class="dialog-buttons">
+                    <button class="dialog-btn dialog-btn-cancel" id="btnCancel">Anuluj</button>
+                    <button class="dialog-btn dialog-btn-send" id="btnSend">Wyślij</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast notification -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
