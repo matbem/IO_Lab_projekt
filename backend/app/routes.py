@@ -14,6 +14,7 @@ def getAnswer():
     if not question:
         return {"error": "Question parameter is required."}, 400
     answer = _call_external_api(question)
+    print(f"Received answer: {answer}")
     _save_question_to_db(question, answer)
     return {"answer": answer}
 # def postQuestion()
@@ -27,7 +28,7 @@ def _call_external_api(question):
         }],
         "generationConfig": {
             "temperature": 0.2,
-            "maxOutputTokens": 1024
+            "maxOutputTokens": 1240
         }
     }
     headers = {"Content-Type": "application/json"}
@@ -47,6 +48,7 @@ def _call_external_api(question):
 
 def _save_question_to_db(question, answer):
     # Placeholder function to save question and answer to the database
+    # pass
     SemanticCache().add_to_cache(question, answer)
 
 if __name__ == "__main__":
