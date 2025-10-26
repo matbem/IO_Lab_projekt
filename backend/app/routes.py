@@ -1,5 +1,5 @@
-from query_engine import SemanticCache
-from flask import Blueprint, request
+from .query_engine import SemanticCache
+from flask import Blueprint, request, jsonify
 import requests
 bp = Blueprint('chat', __name__)
 from dotenv import load_dotenv
@@ -8,15 +8,29 @@ load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") 
 GOOGLE_MODEL = "gemini-2.5-flash"
-@bp.route('/getAnswer', methods=['GET'])
+
+@bp.route('/getAnswer', methods=['POST', 'OPTIONS'])
 def getAnswer():
-    question = request.args.get("question")
+    # Handle CORS preflight
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    # Pobierz dane z JSON
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
+    
+    question = data.get('message')
+    language = data.get('language', 'pl')
+    
     if not question:
-        return {"error": "Question parameter is required."}, 400
+        return jsonify({"error": "Message parameter is required."}), 400
+    
     answer = _call_external_api(question)
     print(f"Received answer: {answer}")
     _save_question_to_db(question, answer)
-    return {"answer": answer}
+    
+    return jsonify({"response": answer, "language": language})
 # def postQuestion()
 #     body = request.get_json()
 #

@@ -5,7 +5,7 @@
         // Translations
         const translations = {
             pl: {
-                title: 'Cześć! Jestem Twój Przyjaciel!',
+                title: 'Cześć! Jestem Twoim Przyjacielem!',
                 askMe: 'Zadaj mi pytanie używając mikrofonu lub wpisz wiadomość!',
                 dialogTitle: 'Wpisz swoją wiadomość',
                 placeholder: 'Co chcesz wiedzieć?',
@@ -104,7 +104,7 @@
             updateTexts();
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/message`, { //endpoint do backendu
+                const response = await fetch(`${API_BASE_URL}/getAnswer`, { //endpoint do backendu
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
