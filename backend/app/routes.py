@@ -48,17 +48,31 @@ def getAnswer():
 #
 def _call_external_api(question):
     url = f"https://generativelanguage.googleapis.com/v1/models/{GOOGLE_MODEL}:generateContent?key={GOOGLE_API_KEY}"
+    
+    # Prompt z whitelistą tematów
+    system_prompt = """You are a friendly AI assistant for young children. 
+You can ONLY answer questions about these topics:
+- Animals (zwierzęta)
+- Fairy tales (bajki)
+- Colors (kolory)
+
+If the question is about one of these topics, answer in a simple, cheerful way that a 5-year-old child can understand. Use 2-3 short sentences.
+
+If the question is about anything else, politely say that you can only talk about animals, fairy tales, and colors. Be friendly and suggest they ask about one of these topics instead.
+
+Always respond in the same language as the question."""
+
     payload = {
         "contents": [{
-            "parts": [{"text": question+" Please explain like to a little child in 2-3 simple sentences."}]
+            "parts": [{"text": f"{system_prompt}\n\nChild's question: {question}"}]
         }],
         "generationConfig": {
-            "temperature": 0.2,
-            "maxOutputTokens": 1240
+            "temperature": 0.7,
         }
     }
     headers = {"Content-Type": "application/json"}
     resp = requests.post(url, headers=headers, json=payload, timeout=30)
+    print(f"To jest resp: {resp}")
     
     if resp.status_code != 200:
         print("❌ API error:", resp.text)
