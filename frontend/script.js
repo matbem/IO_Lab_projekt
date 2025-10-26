@@ -139,50 +139,106 @@
             }
         }
 
-        // odpowiedż z efektem pisania
-        function displayResponse(message) {
-            isSpeaking = true;
+// odpowiedź z efektem pisania i mówieniem 
+async function displayResponse(message) {
+    responseBox.classList.add('visible');
+    responseText.textContent = '';
+    isSpeaking = true;
+
+    try {
+        await speakTextSync(message);
+    } catch (err) {
+        console.error('speakTextSync error:', err);
+        responseText.textContent = message;
+        face.classList.remove('speaking');
+        isSpeaking = false;
+    }
+}
+
+// mówienie z synchronizacją tekstu
+function speakTextSync(text) {
+    return new Promise((resolve, reject) => {
+        if (!('speechSynthesis' in window)) {
+            responseText.textContent = text;
+            face.classList.remove('speaking');
+            isSpeaking = false;
+            return resolve();
+        }
+
+        // Anuluj wszelkie poprzednie 
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = currentLanguage === 'pl' ? 'pl-PL' : 'en-US';
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        let boundarySupported = false;
+        let lastCharIndex = 0;
+        let fallbackInterval = null;
+
+        // uruchomienie mowy i animacji
+        utterance.onstart = () => {
             face.classList.add('speaking');
-            responseBox.classList.add('visible');
-            
-            // efekt pisania
-            let index = 0;
-            responseText.textContent = '';
-            
-            const typingInterval = setInterval(() => {
-                if (index < message.length) {
-                    responseText.textContent += message[index];
-                    index++;
-                } else {
-                    clearInterval(typingInterval);
-                    isSpeaking = false;
-                    face.classList.remove('speaking');
 
-                    // czytanie odpowiedzi 
-                    speakText(message);
+
+            setTimeout(() => {
+                if (!boundarySupported && !fallbackInterval) {
+                    const totalChars = text.length;
+                    const avgSpeed = 50; // ms na znak można dostosować
+                    const totalTime = Math.max(totalChars * avgSpeed, 1000);
+                    const step = totalTime / totalChars;
+
+                    let idx = 0;
+                    responseText.textContent = '';
+                    fallbackInterval = setInterval(() => {
+                        if (idx < totalChars) {
+                            responseText.textContent = text.slice(0, idx + 1);
+                            idx++;
+                        } else {
+                            clearInterval(fallbackInterval);
+                        }
+                    }, step);
                 }
-            }, 50);
-        }
+            }, 150);
+        };
 
-        function speakText(text) {
-            if (!('speechSynthesis' in window)) {
-                console.warn('Speech synthesis not supported in this browser.');
-                return;
+        // synchronizacja tekstu z dźwiękiem, jeśli dostępne onboundary
+        utterance.onboundary = (event) => {
+            if (typeof event.charIndex === 'number') {
+                boundarySupported = true;
+                const idx = Math.min(event.charIndex, text.length);
+                if (idx > lastCharIndex) {
+                    responseText.textContent = text.slice(0, idx);
+                    lastCharIndex = idx;
+                }
             }
+        };
 
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = currentLanguage === 'pl' ? 'pl-PL' : 'en-US';
-            utterance.rate = 1;  
-            utterance.pitch = 1;  
-            utterance.volume = 1; 
+        // zakończenie
+        utterance.onend = () => {
+            if (fallbackInterval) clearInterval(fallbackInterval);
+            responseText.textContent = text;
+            face.classList.remove('speaking');
+            isSpeaking = false;
+            resolve();
+        };
 
-            
-            utterance.onstart = () => face.classList.add('speaking');
-            utterance.onend = () => face.classList.remove('speaking');
+        utterance.onerror = (e) => {
+            console.error('Speech synthesis error:', e);
+            if (fallbackInterval) clearInterval(fallbackInterval);
+            responseText.textContent = text;
+            face.classList.remove('speaking');
+            isSpeaking = false;
+            reject(e);
+        };
 
-            window.speechSynthesis.cancel(); 
-            window.speechSynthesis.speak(utterance);
-        }
+        // opóźnienie startu żeby przeglądarka zdążyłą przetworzyć dźwięk
+        setTimeout(() => window.speechSynthesis.speak(utterance), 150);
+    });
+}
+
 
 
         // updatowanie tekstów w UI na podstawie języka i stanu
