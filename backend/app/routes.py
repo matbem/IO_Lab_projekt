@@ -1,13 +1,17 @@
 from .query_engine import SemanticCache
 from flask import Blueprint, request, jsonify
 import requests
-bp = Blueprint('chat', __name__)
 from dotenv import load_dotenv
 import os
+from loguru import logger
+
+bp = Blueprint('chat', __name__)
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") 
 GOOGLE_MODEL = "gemini-2.5-flash"
+
+database = SemanticCache()
 
 @bp.route('/getAnswer', methods=['POST', 'OPTIONS'])
 def getAnswer():
@@ -26,11 +30,19 @@ def getAnswer():
     if not question:
         return jsonify({"error": "Message parameter is required."}), 400
     
-    answer = _call_external_api(question)
-    print(f"Received answer: {answer}")
-    _save_question_to_db(question, answer)
+    database_answer = database.query(question, similarity_threshold=0.7)
     
-    return jsonify({"response": answer, "language": language})
+    if database_answer:
+        logger.info(f"Returning cached answer.")
+        return jsonify({"response": database_answer, "language": language})
+    else:
+        logger.info(f"Calling external API for answer.")
+        answer = _call_external_api(question)
+        
+        logger.info(f"Received new answer from external API.")
+        database.add_to_cache(question, answer)
+    
+        return jsonify({"response": answer, "language": language})
 # def postQuestion()
 #     body = request.get_json()
 #
