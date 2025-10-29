@@ -5,4 +5,4 @@
 ```bash
 python run.py
 ```
-5. Otwórz plik index.html w katalogu frontend
+5. Otwórz plik index.html w przeglądarce z katalogu frontend
